@@ -21,7 +21,7 @@ public partial class CameraRenderer
 
     static ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit"); //SRPDefaultUnlit是Unity中的一个内置的Shader，用于渲染不受光照影响的物体
 
-    public void Render(ScriptableRenderContext context ,Camera camera)
+    public void Render(ScriptableRenderContext context ,Camera camera, bool useDynamicBatching, bool useGPUInstancing)
     {
         this.context = context;
         this.camera = camera;
@@ -36,7 +36,7 @@ public partial class CameraRenderer
 
         this.Setup();
         //绘制几何体
-        this.DrawVisibleGeometry();
+        this.DrawVisibleGeometry(useDynamicBatching,useGPUInstancing);
         //绘制不支持shader显示
         this.DrawUnsupportedShaders();
         //绘制Gizmos
@@ -58,7 +58,7 @@ public partial class CameraRenderer
         this.ExecuteBuffer();
     }
 
-    void DrawVisibleGeometry()
+    void DrawVisibleGeometry(bool useDynamicBatching, bool useGPUInstancing)
     {
        //渲染不透明物体
         var sortingSetting = new SortingSettings(camera)
@@ -66,8 +66,8 @@ public partial class CameraRenderer
             criteria = SortingCriteria.CommonOpaque
         };
 
-        //指定允许的shader pass name和渲染顺序
-        var drawingSettings = new DrawingSettings(unlitShaderTagId,sortingSetting);
+        //指定允许的shader pass name和渲染顺序                                         //开启动态批处理                             //关闭gpu实例化
+        var drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSetting) { enableDynamicBatching = useDynamicBatching, enableInstancing = useGPUInstancing };
         //指定允许哪些渲染队列
         var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 
